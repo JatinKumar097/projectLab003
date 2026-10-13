@@ -1,0 +1,932 @@
+<title>Nightline</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a clean public-service portal. Utility bar, header with search, hero with a live-trip preview, service grid, stepper, FAQ and footer. Members get a left-sidebar dashboard. Themes: light, dark, high contrast, plus four accent colours and four text sizes. */
+:root{
+  --a-l:#1a73e8;--a-d:#8ab4f8;--a-il:#ffffff;--a-id:#0b1d3a;--a-sl:#174ea6;--a-sd:#aecbfa;
+  --bg:#f8f9fa;--surface:#ffffff;--surface2:#f1f3f4;--fg:#202124;--muted:#5f6368;--line:#dadce0;
+  --brand:var(--a-l);--brand-ink:var(--a-il);--brand-strong:var(--a-sl);
+  --brand-soft:color-mix(in srgb,var(--brand) 11%,var(--surface));
+  --ok:#188038;--warn:#b06000;--bad:#c5221f;
+  --ok-soft:color-mix(in srgb,var(--ok) 12%,var(--surface));--warn-soft:color-mix(in srgb,var(--warn) 13%,var(--surface));--bad-soft:color-mix(in srgb,var(--bad) 11%,var(--surface));
+  --shadow:0 1px 2px rgba(60,64,67,.25),0 2px 6px 2px rgba(60,64,67,.12);
+  --font:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-skin]){
+    --bg:#202124;--surface:#292a2d;--surface2:#35363a;--fg:#e8eaed;--muted:#aab0b6;--line:#4a4c50;
+    --brand:var(--a-d);--brand-ink:var(--a-id);--brand-strong:var(--a-sd);
+    --ok:#81c995;--warn:#fdd663;--bad:#f28b82;--shadow:0 1px 3px rgba(0,0,0,.6);color-scheme:dark}
+}
+:root[data-theme="dark"]:not([data-skin]),:root[data-skin="dark"]{
+  --bg:#202124;--surface:#292a2d;--surface2:#35363a;--fg:#e8eaed;--muted:#aab0b6;--line:#4a4c50;
+  --brand:var(--a-d);--brand-ink:var(--a-id);--brand-strong:var(--a-sd);
+  --ok:#81c995;--warn:#fdd663;--bad:#f28b82;--shadow:0 1px 3px rgba(0,0,0,.6);color-scheme:dark}
+:root[data-skin="contrast"]{
+  --bg:#000;--surface:#000;--surface2:#111;--fg:#fff;--muted:#fff;--line:#fff;
+  --brand:#ffeb3b;--brand-ink:#000;--brand-strong:#fff176;
+  --ok:#69f0ae;--warn:#ffd740;--bad:#ff8a80;--shadow:none;color-scheme:dark}
+:root[data-accent="green"]{--a-l:#0b7a3e;--a-d:#81c995;--a-il:#fff;--a-id:#0a2a17;--a-sl:#075a2d;--a-sd:#a8dab5}
+:root[data-accent="saffron"]{--a-l:#c43e00;--a-d:#ffb74d;--a-il:#fff;--a-id:#3b1c00;--a-sl:#992f00;--a-sd:#ffcc80}
+:root[data-accent="purple"]{--a-l:#6a3fb5;--a-d:#c5a8ff;--a-il:#fff;--a-id:#26114d;--a-sl:#4d2a8a;--a-sd:#dcc9ff}
+:root[data-size="sm"]{font-size:14.5px}
+:root[data-size="lg"]{font-size:18px}
+:root[data-size="xl"]{font-size:20px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:1rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,ul,ol,dl,dd{margin:0}
+h1{font-size:clamp(2rem,4.6vw,3.3rem);line-height:1.12;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,2.8vw,2.1rem);line-height:1.2;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.1rem;line-height:1.3;font-weight:700}
+.lead{font-size:1.15rem;color:var(--muted);max-width:60ch}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+a{color:var(--brand)}
+.ic{width:1.35em;height:1.35em;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.container{max-width:1200px;margin-inline:auto;padding-inline:max(16px,3vw)}
+:is(button,input,select,a,textarea,summary):focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:8px;top:-60px;z-index:100;background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:6px;font-weight:700;text-decoration:none;transition:top .15s}
+.skip:focus{top:8px}
+
+/* utility bar */
+.ubar{background:var(--surface2);border-bottom:1px solid var(--line);font-size:.8rem}
+.ubar .container{display:flex;align-items:center;gap:14px;min-height:38px;flex-wrap:wrap;padding-block:4px}
+.ubar .sp{flex:1}
+.ubar a{color:var(--fg);text-decoration:none;font-weight:600}
+.ubar a:hover{text-decoration:underline}
+.tsize{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.tsize button{font:inherit;font-weight:700;background:var(--surface);color:var(--fg);border:0;border-right:1px solid var(--line);padding:2px 9px;cursor:pointer;min-height:26px}
+.tsize button:last-child{border-right:0}
+.tsize button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink)}
+.ubar select{font:inherit;font-size:.8rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:2px 6px;min-height:26px}
+.ubar label{display:flex;align-items:center;gap:6px;color:var(--muted)}
+@media(max-width:640px){.ubar .hide-s{display:none}}
+
+/* header */
+.hdr{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.hdr .container{display:flex;align-items:center;gap:14px;min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg);font-weight:800;font-size:1.25rem;background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center}
+.logo .ic{width:22px;height:22px}
+.brand small{display:block;font-size:.68rem;font-weight:600;color:var(--muted);letter-spacing:.02em;line-height:1.1;white-space:nowrap}
+.brand{white-space:nowrap;text-align:left}
+.hdr .btn{white-space:nowrap}
+.nav{display:flex;gap:2px;margin-left:12px;flex-wrap:nowrap;white-space:nowrap}
+.nav a,.nav button{font:inherit;font-weight:600;font-size:.92rem;color:var(--fg);text-decoration:none;background:none;border:0;padding:8px 12px;border-radius:20px;cursor:pointer}
+.nav a:hover,.nav button:hover{background:var(--surface2)}
+.hdr .sp{flex:1}
+@media(max-width:1100px){.nav{display:none}}
+.search{position:relative;width:min(280px,26vw);min-width:180px}
+.search input{width:100%;font:inherit;font-size:.92rem;color:var(--fg);background:var(--surface2);border:1px solid transparent;border-radius:24px;padding:9px 14px 9px 40px;min-height:40px}
+.search input:focus{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow);outline:none}
+.search .ic{position:absolute;left:12px;top:10px;color:var(--muted)}
+.sres{position:absolute;top:46px;left:0;right:0;min-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;z-index:60}
+.sres[hidden]{display:none}
+.sres button{display:block;width:100%;text-align:left;font:inherit;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 14px;cursor:pointer;color:var(--fg)}
+.sres button:last-child{border-bottom:0}
+.sres button:hover,.sres button:focus-visible{background:var(--brand-soft)}
+.sres b{display:block}
+.sres span{font-size:.85rem;color:var(--muted)}
+@media(max-width:700px){.search{display:none}}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+/* buttons */
+.btn{font:inherit;font-weight:600;font-size:.95rem;color:var(--brand-ink);background:var(--brand);border:1px solid var(--brand);border-radius:24px;padding:.6em 1.4em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.5em;text-decoration:none;line-height:1.3;min-height:42px;transition:filter .15s,box-shadow .15s}
+.btn:hover{filter:brightness(1.08);box-shadow:var(--shadow)}
+.btn.outline{background:transparent;color:var(--brand);border-color:var(--line)}
+.btn.outline:hover{background:var(--brand-soft);filter:none;box-shadow:none}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+:root[data-skin="dark"] .btn.ok,:root[data-skin="dark"] .btn.danger{color:#111}
+.btn.sm{padding:.35em 1em;font-size:.85rem;min-height:34px}
+.btn.lg{font-size:1.05rem;padding:.75em 1.8em;min-height:50px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+:root[data-skin="contrast"] .btn.outline{border-color:#fff;color:#fff}
+
+/* notice */
+.notice{background:var(--warn-soft);border-bottom:1px solid var(--line);font-size:.9rem}
+.notice .container{display:flex;gap:10px;align-items:center;padding-block:9px}
+.notice .ic{color:var(--warn)}
+.notice button{margin-left:auto;font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;font-weight:700;font-size:1.1rem;line-height:1}
+
+/* hero */
+.hero{background:linear-gradient(180deg,var(--brand-soft),var(--bg))}
+.hero .container{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(24px,5vw,64px);align-items:center;padding-block:clamp(36px,7vw,84px)}
+@media(max-width:900px){.hero .container{grid-template-columns:1fr}}
+.hero .txt{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.ticks{display:flex;gap:18px;flex-wrap:wrap;list-style:none;padding:0;margin:0;font-size:.92rem;color:var(--muted)}
+.ticks li{display:flex;gap:6px;align-items:center}
+.ticks .ic{color:var(--ok);width:1.1em;height:1.1em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:12px}
+.card.elev{box-shadow:var(--shadow);border-color:transparent}
+:root[data-skin="contrast"] .card.elev{border-color:#fff}
+.mock .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;border-radius:14px;padding:3px 10px;background:var(--ok-soft);color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 35%,transparent)}
+.badge.warn{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.badge.bad{background:var(--bad-soft);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.badge.brand{background:var(--brand-soft);color:var(--brand);border-color:color-mix(in srgb,var(--brand) 35%,transparent)}
+.badge i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.route{display:flex;align-items:center;gap:10px;font-weight:700;flex-wrap:wrap}
+.route .dot{width:10px;height:10px;border-radius:50%;border:3px solid var(--brand);flex:none}
+.route .ln{flex:1;min-width:24px;height:0;border-top:2px dashed var(--line)}
+.big{font-size:clamp(2.2rem,5vw,3rem);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.05}
+.meter{height:8px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.meter b{display:block;height:100%;width:0;background:var(--brand);border-radius:6px;transition:width .4s linear}
+
+/* sections */
+.sec{padding-block:clamp(36px,6vw,72px)}
+.sec.alt{background:var(--surface);border-block:1px solid var(--line)}
+.sechead{display:flex;flex-direction:column;gap:8px;margin-bottom:clamp(20px,3vw,32px)}
+.eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.grid{display:grid;gap:clamp(14px,2vw,22px)}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.svc{gap:10px}
+.svc .ico{width:46px;height:46px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.svc .ico .ic{width:24px;height:24px}
+.svc p{color:var(--muted);font-size:.95rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;counter-reset:s}
+.steps .st{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.steps .st::before{counter-increment:s;content:counter(s);width:34px;height:34px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:800}
+.steps .st p{color:var(--muted);font-size:.95rem}
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.alerts .al{padding:20px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0}
+.alerts .al p{color:var(--muted);font-size:.95rem}
+.lvl{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:2px 8px;align-self:flex-start;color:#fff}
+.lvl.l1{background:#b06000}.lvl.l2{background:#c26401}.lvl.l3{background:#b3261e}.lvl.l4{background:#8c1d18}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface2)}
+tr:last-child td{border-bottom:0}
+.faq{display:flex;flex-direction:column;gap:10px;max-width:860px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0}
+.faq summary{cursor:pointer;font-weight:700;padding:16px 18px;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--brand);font-weight:500}
+.faq details[open] summary::after{content:"–"}
+.faq details p{padding:0 18px 18px;color:var(--muted)}
+.cta{background:var(--brand);color:var(--brand-ink);border-radius:16px;padding:clamp(24px,4vw,44px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta p{opacity:.9;margin-top:6px}
+.cta .btn{background:var(--brand-ink);color:var(--brand);border-color:var(--brand-ink)}
+.foot{background:var(--surface);border-top:1px solid var(--line);margin-top:40px}
+.foot .container{padding-block:36px;display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:28px}
+@media(max-width:800px){.foot .container{grid-template-columns:1fr 1fr}}
+.foot h4{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.foot ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.foot a,.foot button.lk{color:var(--fg);text-decoration:none;background:none;border:0;padding:0;font:inherit;cursor:pointer;text-align:left}
+.foot a:hover,.foot button.lk:hover{text-decoration:underline;color:var(--brand)}
+.legal{border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.legal .container{padding-block:16px;display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lab{font-weight:600;font-size:.9rem}
+.field input,.field select,.field textarea{font:inherit;font-size:1.05rem;color:var(--fg);background:var(--surface);border:1px solid var(--muted);border-radius:8px;padding:12px 14px;min-height:48px;width:100%}
+.field input:focus,.field select:focus{border-color:var(--brand);outline:2px solid var(--brand);outline-offset:0}
+.field .help{font-size:.85rem;color:var(--muted)}
+.req{color:var(--bad)}
+.err{color:var(--bad);font-weight:600;font-size:.92rem;min-height:1.3em}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font:inherit;font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--muted);border-radius:20px;padding:.5em 1.1em;cursor:pointer;min-height:40px}
+.chip:hover{background:var(--brand-soft)}
+.chip[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.pin{display:flex;gap:10px}
+.pin input{width:3.4rem;height:3.6rem;text-align:center;font:inherit;font-size:1.6rem;font-weight:700;border:1px solid var(--muted);border-radius:8px;background:var(--surface);color:var(--fg);padding:0}
+.pin input:focus{border-color:var(--brand);outline:2px solid var(--brand)}
+.check{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;background:var(--surface)}
+.check input{width:1.3rem;height:1.3rem;accent-color:var(--brand);flex:none;margin-top:.15rem}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:0}
+.switch input{width:1.3rem;height:1.3rem;accent-color:var(--brand)}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* wizard */
+.wizwrap{max-width:1000px;margin-inline:auto;padding:clamp(20px,4vw,44px) max(16px,3vw) 60px;display:grid;grid-template-columns:240px minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:start}
+@media(max-width:820px){.wizwrap{grid-template-columns:1fr}}
+.stepper{display:flex;flex-direction:column;gap:2px;position:sticky;top:96px}
+@media(max-width:820px){.stepper{flex-direction:row;overflow-x:auto;position:static;gap:8px}}
+.stepper .sg{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:.92rem;white-space:nowrap}
+.stepper .sg span{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;flex:none}
+.stepper .sg.on{background:var(--brand-soft);color:var(--brand)}
+.stepper .sg.on span{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.stepper .sg.done span{background:var(--ok);border-color:var(--ok);color:#fff}
+.stepper .sg.done{color:var(--fg)}
+.wizcard{padding:clamp(20px,3vw,36px);gap:18px;min-height:380px}
+.wizcard .meta{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);font-weight:600;flex-wrap:wrap}
+.wizcard .meter{height:6px}
+.q{font-size:clamp(1.4rem,3vw,1.9rem);font-weight:700;line-height:1.25}
+.stepin{display:flex;flex-direction:column;gap:16px;animation:in .35s ease both}
+.stepin.back{animation-name:inb}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes inb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.rv{display:grid;grid-template-columns:minmax(110px,150px) 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rv small{color:var(--muted);font-weight:600}
+.rv button{font:inherit;font-weight:600;font-size:.85rem;color:var(--brand);background:none;border:0;cursor:pointer}
+.selfie{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.selfie img{width:88px;height:88px;object-fit:cover;border-radius:50%;border:3px solid var(--line)}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* dashboard */
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);gap:0;min-height:calc(100vh - 110px);max-width:1400px;margin-inline:auto}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.side{padding:20px 12px;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:4px;position:sticky;top:65px;align-self:start;height:calc(100vh - 65px)}
+@media(max-width:900px){.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;position:sticky;top:65px;z-index:30;height:auto}}
+.side button{font:inherit;font-weight:600;color:var(--fg);background:none;border:0;border-radius:24px;padding:11px 16px;text-align:left;display:flex;align-items:center;gap:12px;cursor:pointer;white-space:nowrap}
+.side button:hover{background:var(--surface2)}
+.side button[aria-current=page]{background:var(--brand-soft);color:var(--brand)}
+.side .sep{height:1px;background:var(--line);margin:10px 8px}
+@media(max-width:900px){.side .sep{display:none}}
+.main{padding:clamp(18px,3vw,36px);display:flex;flex-direction:column;gap:22px;min-width:0}
+.page{display:none;flex-direction:column;gap:22px}
+.page.on{display:flex;animation:in .3s ease both}
+.pagehead{display:flex;flex-direction:column;gap:4px}
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:1000px){.cols{grid-template-columns:1fr}}
+.stack{display:flex;flex-direction:column;gap:22px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
+.kpi b{font-size:1.8rem;font-weight:800;line-height:1.1}
+.kpi span{color:var(--muted);font-size:.88rem}
+.tl{display:flex;flex-direction:column;position:relative;padding-left:30px;gap:14px}
+.tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.ev{position:relative;display:flex;flex-direction:column;opacity:.6}
+.ev::before{content:"";position:absolute;left:-30px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:2px solid var(--muted)}
+.ev.on{opacity:1}
+.ev.on::before{background:var(--bad);border-color:var(--bad)}
+.ev .w{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev small{color:var(--muted)}
+.feed{display:flex;flex-direction:column;max-height:340px;overflow-y:auto}
+.fi{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.fi:last-child{border-bottom:0}
+.fi time{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.fi.bad span{color:var(--bad);font-weight:600}
+.fi.ok span{color:var(--ok);font-weight:600}
+.sim{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--brand-soft);color:var(--brand);border-radius:4px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.empty{color:var(--muted)}
+.contact{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.contact .avatar{width:46px;height:46px;font-size:1.1rem}
+.contact .grow{flex:1;min-width:160px}
+.ready{display:flex;flex-direction:column;gap:2px}
+.ready li{display:flex;gap:10px;align-items:center;padding:8px 0;list-style:none;border-bottom:1px solid var(--line);font-size:.95rem}
+.ready li:last-child{border-bottom:0}
+.ready .ic{color:var(--muted)}
+.ready .done .ic{color:var(--ok)}
+.ready .done span{color:var(--muted);text-decoration:line-through}
+.ready ul{padding:0;margin:0}
+.donut{width:78px;height:78px;border-radius:50%;background:conic-gradient(var(--brand) calc(var(--p)*1%),var(--surface2) 0);display:grid;place-items:center;flex:none}
+.donut span{width:60px;height:60px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-weight:800}
+.sos{background:var(--bad-soft);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+.pin2{font-variant-numeric:tabular-nums}
+
+/* modal and toast */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:16px}
+.modal[hidden]{display:none}
+.mbox{width:min(480px,100%);max-height:92vh;overflow-y:auto;background:var(--surface);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);animation:in .25s ease both}
+:root[data-skin="contrast"] .mbox{border:2px solid #fff}
+.scan{position:relative;width:170px;height:170px;margin-inline:auto;border-radius:20px;background:var(--surface2);overflow:hidden;display:grid;place-items:center;color:var(--muted);font-weight:600;font-size:.9rem}
+.scan img{width:100%;height:100%;object-fit:cover}
+.scan .beam{position:absolute;left:0;right:0;height:3px;background:var(--ok);box-shadow:0 0 14px 4px var(--ok);top:0;animation:beam 1.1s ease-in-out infinite alternate}
+@keyframes beam{to{top:calc(100% - 3px)}}
+.toasts{position:fixed;left:50%;bottom:20px;translate:-50% 0;z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(92vw,480px)}
+.toast{background:#202124;color:#fff;border-radius:8px;padding:12px 16px;font-weight:600;box-shadow:var(--shadow);width:100%;animation:in .3s ease both;font-size:.95rem}
+.toast.bad{background:#b3261e}.toast.good{background:#146c2e}
+:root[data-skin="contrast"] .toast{border:2px solid #fff}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.5v5.8c0 4.7 3.2 8.6 7.5 10.2 4.3-1.6 7.5-5.5 7.5-10.2V5.5z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+<symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.5"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16.5 14c3 0 5 2 5 5.5"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+<symbol id="ic-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+<symbol id="ic-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+<symbol id="ic-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+<symbol id="ic-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></symbol>
+<symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol>
+<symbol id="ic-face" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M9 10v1.2M15 10v1.2M9 15c1.2 1.2 4.8 1.2 6 0"/></symbol>
+<symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></symbol>
+<symbol id="ic-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5M12 17h.01"/></symbol>
+<symbol id="ic-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+</defs>
+</svg>
+
+<a class="skip" href="#content">Skip to main content</a>
+
+<div class="ubar"><div class="container">
+  <span class="hide-s">Prototype: not an official government service</span>
+  <span class="sp"></span>
+  <a href="#" data-act="sosinfo">Emergency: 112</a>
+  <div class="tsize" role="group" aria-label="Text size"><button type="button" data-size="sm" aria-label="Smaller text">A-</button><button type="button" data-size="md" aria-label="Default text size">A</button><button type="button" data-size="lg" aria-label="Larger text">A+</button><button type="button" data-size="xl" aria-label="Largest text">A++</button></div>
+  <label>Theme <select id="skinSel" aria-label="Theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option><option value="contrast">High contrast</option></select></label>
+  <label class="hide-s">Colour <select id="accSel" aria-label="Accent colour"><option value="blue">Blue</option><option value="green">Green</option><option value="saffron">Saffron</option><option value="purple">Purple</option></select></label>
+</div></div>
+
+<header class="hdr"><div class="container" id="hdr"></div></header>
+<div class="notice" id="notice"><div class="container"><svg class="ic"><use href="#ic-alert"/></svg><span><b>Prototype notice.</b> Alerts and messages are simulated on screen. Nothing is sent to real people. In an emergency, call 112.</span><button type="button" id="noticeX" aria-label="Dismiss notice">×</button></div></div>
+
+<main id="content">
+
+<!-- LANDING -->
+<div id="vLanding">
+  <section class="hero"><div class="container">
+    <div class="txt">
+      <span class="pill"><i></i>Night travel check-ins for students and women</span>
+      <h1>Get there.<br>We’ll check in.</h1>
+      <p class="lead">A face-verified check-in web app that keeps students and women connected to people they trust, all the way home.</p>
+      <div class="row"><button class="btn lg" data-go="register">Register to get started</button><button class="btn outline lg" data-go="login">Log in</button></div>
+      <ul class="ticks"><li><svg class="ic"><use href="#ic-check"/></svg>Takes about 3 minutes</li><li><svg class="ic"><use href="#ic-check"/></svg>You choose who is told</li><li><svg class="ic"><use href="#ic-check"/></svg>One PIN stops alerts</li></ul>
+    </div>
+    <div class="card elev mock" aria-label="Example trip card">
+      <div class="top"><span class="badge"><i></i>Trip active</span><span class="small muted">Example</span></div>
+      <div class="route"><span>Central Library</span><span class="dot"></span><span class="ln"></span><span class="dot"></span><span>Hostel C</span></div>
+      <div><div class="small muted">Check in within</div><div class="big" id="demoClock">24:12</div></div>
+      <div class="meter"><b id="demoMeter" style="width:34%"></b></div>
+      <div class="small muted">Check in by <b style="color:var(--fg)">10:40 pm</b> · Trusted adult: <b style="color:var(--fg)">Mum</b></div>
+      <div class="row"><span class="btn ok sm" aria-hidden="true">Check in with face</span><span class="btn outline sm" aria-hidden="true">Cancel trip</span></div>
+    </div>
+  </div></section>
+
+  <section class="sec" id="services"><div class="container">
+    <div class="sechead"><span class="eyebrow">Services</span><h2>Everything you need for a safer trip home</h2><p class="lead">Six tools, one account. Your circle is only involved if you miss a check-in.</p></div>
+    <div class="grid g3">
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-route"/></svg></div><h3>Plan a trip</h3><p>Pick where you are leaving from and where you are going, with your expected arrival time.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-face"/></svg></div><h3>Face check-in</h3><p>A quick selfie confirms it is really you, with no typing while you walk.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-users"/></svg></div><h3>Trusted circle</h3><p>Add up to three adults you choose. They agree before you add them.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-bell"/></svg></div><h3>Escalating alerts</h3><p>Missed check-ins move from you, to your trusted adult, to emergency help.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-clock"/></svg></div><h3>Trip history</h3><p>See every trip, whether you arrived safe, and whether alerts fired.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-lock"/></svg></div><h3>Privacy controls</h3><p>See what is saved, change your details, or delete everything at any time.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec alt" id="how"><div class="container">
+    <div class="sechead"><span class="eyebrow">How it works</span><h2>Four steps from leaving to home</h2></div>
+    <div class="steps">
+      <div class="st"><h3>Plan</h3><p>Pick where you are leaving from and where you are going.</p></div>
+      <div class="st"><h3>Set</h3><p>Add your expected arrival time and a trusted contact.</p></div>
+      <div class="st"><h3>Verify</h3><p>Check in with a quick face scan so we know it is really you.</p></div>
+      <div class="st"><h3>Arrive</h3><p>Confirm you are home. The plan closes and everyone relaxes.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec" id="who"><div class="container">
+    <div class="sechead"><span class="eyebrow">Who it’s for</span><h2>Built for people who travel after dark</h2></div>
+    <div class="grid g2">
+      <div class="card"><h3>Students</h3><ul class="ticks" style="flex-direction:column;gap:8px;color:var(--fg)"><li><svg class="ic"><use href="#ic-check"/></svg>Late labs, libraries and exams</li><li><svg class="ic"><use href="#ic-check"/></svg>Walks to hostels and PGs</li><li><svg class="ic"><use href="#ic-check"/></svg>Shared autos and cabs home</li></ul></div>
+      <div class="card"><h3>Women</h3><ul class="ticks" style="flex-direction:column;gap:8px;color:var(--fg)"><li><svg class="ic"><use href="#ic-check"/></svg>Late shifts and commutes</li><li><svg class="ic"><use href="#ic-check"/></svg>Evenings out, ride-hailing home</li><li><svg class="ic"><use href="#ic-check"/></svg>Travelling alone in unfamiliar areas</li></ul></div>
+    </div>
+    <p class="lead" style="margin-top:20px;color:var(--fg);font-weight:600">One promise: someone you trust always knows your plan.</p>
+  </div></section>
+
+  <section class="sec alt" id="safety"><div class="container">
+    <div class="sechead"><span class="eyebrow">The safety net</span><h2>Miss a check-in and help steps up</h2></div>
+    <div class="alerts">
+      <div class="al"><span class="lvl l1">Now</span><h3>First alert</h3><p>A message to you: you have missed a check-in.</p></div>
+      <div class="al"><span class="lvl l2">+5 min</span><h3>Second alert</h3><p>Another message. One tap on “I’m okay” stops everything.</p></div>
+      <div class="al"><span class="lvl l3">Still no action</span><h3>Trusted adult</h3><p>Your location goes to your chosen adult or family member.</p></div>
+      <div class="al"><span class="lvl l4">No family action</span><h3>Emergency help</h3><p>An emergency message goes to the police or a helpline.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec" id="privacy"><div class="container">
+    <div class="sechead"><span class="eyebrow">Trust and privacy</span><h2>Safety that stays in your control</h2></div>
+    <div class="grid g4">
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-users"/></svg></div><h3>You pick your contacts</h3><p>Your trusted adult is someone you choose, with their permission.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-pin"/></svg></div><h3>Location when needed</h3><p>Your location is shared only after check-ins are missed.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-check"/></svg></div><h3>Stop it anytime</h3><p>One reply of “I’m okay” ends the alert chain.</p></div>
+      <div class="card svc"><div class="ico"><svg class="ic"><use href="#ic-face"/></svg></div><h3>Consent for your face</h3><p>Face data verifies check-ins and nothing else.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec alt" id="helplines"><div class="container">
+    <div class="sechead"><span class="eyebrow">Help and helplines</span><h2>Need help right now?</h2><p class="lead">Nightline is not a replacement for emergency services. These numbers are for India. Check your local listing if you are elsewhere.</p></div>
+    <div class="tablewrap"><table><thead><tr><th>Service</th><th>Number</th><th>Use it for</th></tr></thead><tbody>
+      <tr><td><b>Emergency response</b></td><td><b>112</b></td><td>Police, fire and ambulance in one number</td></tr>
+      <tr><td><b>Police</b></td><td><b>100</b></td><td>Report a crime or immediate danger</td></tr>
+      <tr><td><b>Women helpline</b></td><td><b>1091</b></td><td>Women in distress</td></tr>
+      <tr><td><b>Women helpline (domestic abuse)</b></td><td><b>181</b></td><td>Support and referral for women</td></tr>
+    </tbody></table></div>
+  </div></section>
+
+  <section class="sec" id="faq"><div class="container">
+    <div class="sechead"><span class="eyebrow">FAQ</span><h2>Frequently asked questions</h2></div>
+    <div class="faq">
+      <details><summary>What is Nightline?</summary><p>Nightline is a web app that turns every night trip into a plan with a safety net. You tell it where you are going and when you will arrive, and your trusted adult is told only if you miss your check-in.</p></details>
+      <details><summary>How does a check-in work?</summary><p>You open the app, take a quick selfie and confirm. In this prototype the selfie is not compared with your face yet. Real face matching is planned for the next phase.</p></details>
+      <details><summary>What happens if I miss a check-in?</summary><p>You get a first alert, then a second alert five minutes later. If there is still no action, your trip details go to your trusted adult. If the family does not act, an emergency message goes to the police or a helpline.</p></details>
+      <details><summary>How do I stop the alerts?</summary><p>Type your 4-digit PIN on the “I’m okay” screen. One entry ends the whole alert chain.</p></details>
+      <details><summary>Who can see my location?</summary><p>Only the people you choose, and only after check-ins are missed. This prototype does not read your device location. It uses the places you type in.</p></details>
+      <details><summary>Are the alerts real?</summary><p>No. In this prototype alerts, SMS and emergency messages are simulated on screen and nothing is sent. Real delivery is part of the roadmap.</p></details>
+      <details><summary>Where is my data stored?</summary><p>In this browser on this device. Nothing is uploaded. You can delete everything from Settings at any time.</p></details>
+    </div>
+  </div></section>
+
+  <section class="sec" style="padding-top:0"><div class="container"><div class="cta"><div><h2>Register to open your Nightline space</h2><p>Answer a few short questions, one at a time. Then plan your first trip.</p></div><button class="btn lg" data-go="register">Register now</button></div></div></section>
+</div>
+
+<!-- WIZARD -->
+<div id="vWizard" hidden><div class="wizwrap"><nav class="stepper" id="stepper" aria-label="Registration sections"></nav><div class="card elev wizcard" id="wizcard"></div></div></div>
+
+<!-- APP -->
+<div id="vApp" hidden>
+  <div class="app">
+    <nav class="side" id="side" aria-label="Dashboard"></nav>
+    <div class="main">
+      <div class="page on" id="p-overview"></div>
+      <div class="page" id="p-plan"></div>
+      <div class="page" id="p-history"></div>
+      <div class="page" id="p-circle"></div>
+      <div class="page" id="p-toolkit"></div>
+      <div class="page" id="p-settings"></div>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer class="foot" id="foot">
+  <div class="container">
+    <div><div class="brand" style="cursor:default"><span class="logo"><svg class="ic"><use href="#ic-shield"/></svg></span>Nightline</div><p class="muted small" style="margin-top:10px;max-width:34ch">Night travel check-ins that keep students and women connected to people they trust, all the way home.</p></div>
+    <div><h4>Services</h4><ul><li><button class="lk" data-scroll="services">All services</button></li><li><button class="lk" data-scroll="how">How it works</button></li><li><button class="lk" data-scroll="safety">The safety net</button></li></ul></div>
+    <div><h4>Support</h4><ul><li><button class="lk" data-scroll="helplines">Helplines</button></li><li><button class="lk" data-scroll="faq">FAQ</button></li><li><button class="lk" data-scroll="privacy">Privacy</button></li></ul></div>
+    <div><h4>Account</h4><ul><li><button class="lk" data-go="register">Register</button></li><li><button class="lk" data-go="login">Log in</button></li></ul></div>
+  </div>
+  <div class="legal"><div class="container"><span>© 2026 Nightline. A college project prototype.</span><span>Not an official government service. In an emergency, call 112.</span></div></div>
+</footer>
+
+<div class="modal" id="modal" hidden><div class="mbox" id="mbox" role="dialog" aria-modal="true"></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+  var KEY='nightline.prototype.v1',PKEY='nightline.prefs.v1',memS=null,memP=null;
+  function lj(k){try{var r=localStorage.getItem(k);if(r)return JSON.parse(r)}catch(e){}return null}
+  function sj(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  var S=lj(KEY)||memS||{user:null,trip:null,history:[],feed:[],demo:true};
+  function norm(){S.history=S.history||[];S.feed=S.feed||[];S.places=S.places||[];S.tips=S.tips||[];S.prefs=S.prefs||{inapp:true,sms:true,summary:false};if(S.demo===undefined)S.demo=true}
+  norm();memS=S;
+  function save(){memS=S;sj(KEY,S)}
+  var P=lj(PKEY)||memP||{skin:'auto',accent:'blue',size:'md'};
+  var authed=false,view='landing',page='overview';
+
+  var $=function(s,r){return(r||document).querySelector(s)};
+  var $$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+  function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function first(n){return String(n||'').trim().split(/\s+/)[0]||''}
+  function fmtTime(ts){return new Date(ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}
+  function fmtDate(ts){return new Date(ts).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})}
+  function mmss(ms){var s=Math.max(0,Math.round(ms/1000)),m=Math.floor(s/60);return String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+  function ic(n,cls){return '<svg class="ic '+(cls||'')+'" aria-hidden="true"><use href="#ic-'+n+'"/></svg>'}
+  function toast(msg,kind){var t=document.createElement('div');t.className='toast '+(kind||'');t.textContent=msg;$('#toasts').appendChild(t);setTimeout(function(){t.remove()},4200)}
+  function openModal(html){$('#mbox').innerHTML=html;$('#modal').hidden=false;var f=$('#mbox input,#mbox button');if(f)try{f.focus()}catch(e){}}
+  function closeModal(){$('#modal').hidden=true;$('#mbox').innerHTML=''}
+  $('#modal').addEventListener('click',function(e){if(e.target.id==='modal')closeModal()});
+  addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('#modal').hidden)closeModal();var r=$('#sres');if(r)r.hidden=true}});
+
+  /* ---------- display preferences ---------- */
+  function applyPrefs(){
+    var r=document.documentElement;
+    if(P.skin==='auto')r.removeAttribute('data-skin');else r.setAttribute('data-skin',P.skin);
+    r.setAttribute('data-accent',P.accent);r.setAttribute('data-size',P.size);
+    $('#skinSel').value=P.skin;$('#accSel').value=P.accent;
+    $$('.tsize button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.size===P.size)});
+    memP=P;sj(PKEY,P);
+  }
+  $('#skinSel').onchange=function(){P.skin=this.value;applyPrefs();if(view==='app'&&page==='settings')renderSettings()};
+  $('#accSel').onchange=function(){P.accent=this.value;applyPrefs();if(view==='app'&&page==='settings')renderSettings()};
+  $$('.tsize button').forEach(function(b){b.onclick=function(){P.size=b.dataset.size;applyPrefs();if(view==='app'&&page==='settings')renderSettings()}});
+  $('#noticeX').onclick=function(){$('#notice').hidden=true};
+
+  /* ---------- header and search ---------- */
+  var INDEX=[
+    {t:'Plan a trip',d:'Choose where you leave from, where you go and when you arrive',a:'app:plan'},
+    {t:'Trip history',d:'See past trips and whether alerts fired',a:'app:history'},
+    {t:'My circle',d:'Add or remove trusted adults',a:'app:circle'},
+    {t:'Safety toolkit',d:'SOS, helplines and safety tips',a:'app:toolkit'},
+    {t:'Settings',d:'Change your details, PIN, theme and text size',a:'app:settings'},
+    {t:'Register',d:'Create your Nightline account',a:'go:register'},
+    {t:'Log in',d:'Use your 4-digit PIN',a:'go:login'},
+    {t:'How it works',d:'Plan, set, verify, arrive',a:'sc:how'},
+    {t:'The safety net',d:'What happens when you miss a check-in',a:'sc:safety'},
+    {t:'Helplines',d:'Emergency numbers: 112, 100, 1091, 181',a:'sc:helplines'},
+    {t:'Privacy',d:'What is saved and who sees it',a:'sc:privacy'},
+    {t:'FAQ',d:'Common questions answered',a:'sc:faq'}
+  ];
+  function header(){
+    var h='<button class="brand" data-go="landing" aria-label="Nightline home"><span class="logo">'+ic('shield')+'</span><span>Nightline<small>Night travel check-ins</small></span></button>';
+    if(view==='landing')h+='<nav class="nav" aria-label="Main"><button data-scroll="services">Services</button><button data-scroll="how">How it works</button><button data-scroll="safety">Safety net</button><button data-scroll="helplines">Helplines</button><button data-scroll="faq">FAQ</button></nav>';
+    h+='<span class="sp"></span>';
+    h+='<div class="search" role="search">'+ic('search')+'<input id="sq" type="search" placeholder="Search Nightline" aria-label="Search Nightline" autocomplete="off"><div class="sres" id="sres" hidden></div></div>';
+    if(view==='landing')h+='<button class="btn outline sm" data-go="login">Log in</button><button class="btn sm" data-go="register">Register</button>';
+    else if(view==='wizard')h+='<button class="btn outline sm" data-go="landing">Exit</button>';
+    else{var u=S.user||{};h+='<span class="avatar" title="'+esc(u.name)+'">'+(u.selfie?'<img alt="" src="'+u.selfie+'">':esc((u.name||'?').charAt(0).toUpperCase()))+'</span><button class="btn outline sm" data-act="logout">Log out</button>'}
+    $('#hdr').innerHTML=h;
+    var q=$('#sq'),r=$('#sres');
+    q.oninput=function(){
+      var v=q.value.trim().toLowerCase();if(!v){r.hidden=true;return}
+      var m=INDEX.filter(function(i){return(i.t+' '+i.d).toLowerCase().indexOf(v)>-1}).slice(0,6);
+      r.innerHTML=m.length?m.map(function(i,k){return '<button type="button" data-sr="'+INDEX.indexOf(i)+'"><b>'+esc(i.t)+'</b><span>'+esc(i.d)+'</span></button>'}).join(''):'<button type="button" disabled><span>No results for “'+esc(q.value)+'”</span></button>';
+      r.hidden=false;
+    };
+    q.onkeydown=function(e){if(e.key==='Enter'){var b=$('#sres button[data-sr]');if(b)b.click()}};
+  }
+  document.addEventListener('click',function(e){if(!e.target.closest('.search')){var r=$('#sres');if(r)r.hidden=true}});
+  function run(a){
+    var p=a.split(':'),k=p[0],v=p[1];
+    var r=$('#sres');if(r)r.hidden=true;var q=$('#sq');if(q)q.value='';
+    if(k==='app'){if(authed){page=v;show('app')}else{toast('Log in or register to open your Nightline space.');S.user?openLogin():startWizard()}}
+    else if(k==='go'){go(v)}
+    else if(k==='sc'){scrollTo2(v)}
+  }
+  function scrollTo2(id){
+    if(view!=='landing')show('landing');
+    setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},30);
+  }
+  function go(d){
+    if(d==='landing')show('landing');
+    else if(d==='register'){S.user?openModal(confirmReplace()):startWizard()}
+    else if(d==='login'){S.user?openLogin():(toast('No account yet. Register first.'),startWizard())}
+  }
+  function show(v){
+    view=v;
+    $('#vLanding').hidden=v!=='landing';$('#vWizard').hidden=v!=='wizard';$('#vApp').hidden=v!=='app';
+    $('#foot').hidden=v==='wizard';
+    header();window.scrollTo(0,0);
+    if(v==='app')renderApp();
+  }
+
+  /* ---------- clicks ---------- */
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    var sr=t.closest('[data-sr]');if(sr){run(INDEX[+sr.dataset.sr].a);return}
+    var g=t.closest('[data-go]');if(g){go(g.dataset.go);return}
+    var sc=t.closest('[data-scroll]');if(sc){scrollTo2(sc.dataset.scroll);return}
+    var pg=t.closest('[data-page]');if(pg){page=pg.dataset.page;renderApp();window.scrollTo(0,0);return}
+    var a=t.closest('[data-act]');if(a){e.preventDefault();act(a.dataset.act,a);return}
+  });
+  function confirmReplace(){return '<h3>You already have an account here</h3><p class="muted">Starting a new registration will replace the saved account in this browser, including your trips.</p><div class="actions"><button class="btn danger" data-act="replace">Replace it</button><button class="btn outline" data-act="closem">Keep my account</button></div>'}
+
+  /* ---------- PIN helpers and login ---------- */
+  function pinInputs(){return[0,1,2,3].map(function(i){return '<input inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit '+(i+1)+'">'}).join('')}
+  function wirePin(sel,onfull){
+    var box=$(sel);if(!box)return;var ins=$$('input',box);
+    ins.forEach(function(inp,i){
+      inp.addEventListener('input',function(){inp.value=inp.value.replace(/\D/g,'').slice(0,1);if(inp.value&&ins[i+1])ins[i+1].focus();else if(inp.value&&i===3&&onfull)onfull()});
+      inp.addEventListener('keydown',function(e){if(e.key==='Backspace'&&!inp.value&&ins[i-1])ins[i-1].focus()});
+      inp.addEventListener('paste',function(e){var t=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);if(t){e.preventDefault();ins.forEach(function(x,k){x.value=t[k]||''});ins[Math.min(t.length,3)].focus()}});
+    });
+  }
+  function readPin(sel){return $$(sel+' input').map(function(i){return i.value}).join('')}
+  function openLogin(){
+    openModal('<h3>Welcome back, '+esc(first(S.user.name))+'</h3><p class="muted">Enter your 4-digit PIN to open your Nightline space.</p><div class="pin" id="lpin">'+pinInputs()+'</div><div class="err" id="lerr" role="alert"></div><div class="actions"><button class="btn" data-act="dologin">Log in</button><button class="btn outline" data-act="closem">Cancel</button></div>');
+    wirePin('#lpin',function(){act('dologin')});
+  }
+
+  /* ---------- registration wizard (same steps and checks as before) ---------- */
+  var STEPS=[
+    {id:'name',sec:0,type:'text',q:'What should we call you?',hint:'First name or a nickname is fine.',ph:'e.g. Aanya',min:2,msg:'Please enter at least 2 letters.'},
+    {id:'role',sec:0,type:'choice',q:'Who is Nightline for?',opts:['Student','Woman','Student and woman','Other traveller'],msg:'Pick one option to continue.'},
+    {id:'phone',sec:0,type:'tel',q:'Your mobile number',hint:'We use it to send you alerts. It is not shared with anyone.',ph:'98765 43210',re:/^\+?[\d\s-]{10,14}$/,msg:'Enter a valid mobile number with 10 digits.'},
+    {id:'base',sec:1,type:'text',q:'Where do you study or work?',hint:'A campus, building or workplace name.',ph:'e.g. Central Library, Block B',min:2,msg:'Tell us where you usually start your trips.'},
+    {id:'home',sec:1,type:'text',q:'Where do you usually travel home to?',hint:'A hostel, PG or area name is enough. No full address needed.',ph:'e.g. Hostel C',min:2,msg:'Tell us where you usually get home to.'},
+    {id:'modes',sec:1,type:'multi',q:'How do you usually get home?',hint:'Pick all that apply.',opts:['Walk','Shared auto','Cab','Bus','Metro or train','Bike or scooter'],msg:'Pick at least one way to travel.'},
+    {id:'cname',sec:2,type:'text',q:'Who is your trusted adult?',hint:'Someone you choose. They get your trip details only if you miss check-ins.',ph:'e.g. Mum',min:2,msg:'Enter the name of someone you trust.'},
+    {id:'cphone',sec:2,type:'tel',q:function(d){return(first(d.cname)?first(d.cname)+'’s':'Their')+' mobile number'},hint:'Used only if you miss your check-ins.',ph:'98765 43210',re:/^\+?[\d\s-]{10,14}$/,msg:'Enter a valid mobile number with 10 digits.'},
+    {id:'crel',sec:2,type:'choice',q:function(d){return 'How do you know '+(first(d.cname)||'them')+'?'},opts:['Parent','Sibling','Friend','Partner','Warden or mentor','Other'],msg:'Pick one option to continue.'},
+    {id:'pin',sec:3,type:'pin',q:'Set your “I’m okay” PIN',hint:'4 digits. You type it to stop alerts and to log in again. Do not use 0000 or 1234.',msg:'Enter 4 digits that are not 0000 or 1234.'},
+    {id:'face',sec:3,type:'face',q:'Face check-in',hint:'A quick selfie confirms it is really you. Your photo stays in this browser and is used only for check-ins.',msg:'Choose whether to set up face check-in.'},
+    {id:'consent',sec:4,type:'consent',q:'Your consent',hint:'Tick each box to continue.',msg:'Please tick all three boxes to continue.'},
+    {id:'review',sec:4,type:'review',q:'Check your details',hint:'Choose Edit to change anything. Then create your space.'}
+  ];
+  var SECS=['Personal details','Travel','Trusted adult','Security','Consent and review'];
+  var D={},si=0;
+  function startWizard(){closeModal();D={modes:[],consent:[false,false,false]};si=0;show('wizard');renderStep(1)}
+  function qText(st){return typeof st.q==='function'?st.q(D):st.q}
+  function renderStepper(){
+    var cur=STEPS[si].sec;
+    $('#stepper').innerHTML=SECS.map(function(s,i){return '<div class="sg '+(i===cur?'on':i<cur?'done':'')+'" '+(i===cur?'aria-current="step"':'')+'><span>'+(i<cur?'✓':i+1)+'</span>'+esc(s)+'</div>'}).join('');
+  }
+  function renderStep(dir){
+    var st=STEPS[si],n=STEPS.length;renderStepper();
+    var h='<div class="meta"><span>Step '+(si+1)+' of '+n+'</span><span>'+esc(SECS[st.sec])+'</span></div><div class="meter" aria-hidden="true"><b style="width:'+((si+1)/n*100)+'%"></b></div>';
+    h+='<div class="stepin '+(dir<0?'back':'')+'"><h2 class="q" id="qh" tabindex="-1">'+esc(qText(st))+'</h2>';
+    if(st.hint)h+='<p class="muted">'+esc(st.hint)+'</p>';
+    if(st.type==='text'||st.type==='tel'){
+      h+='<div class="field"><label for="in" class="sr">'+esc(qText(st))+'</label><input id="in" type="'+(st.type==='tel'?'tel':'text')+'" placeholder="'+esc(st.ph||'')+'" value="'+esc(D[st.id]||'')+'" autocomplete="off" '+(st.type==='tel'?'inputmode="tel"':'')+'></div>';
+    }else if(st.type==='choice'||st.type==='multi'){
+      h+='<div class="chips" role="group" aria-labelledby="qh">'+st.opts.map(function(o){var on=st.type==='multi'?(D.modes||[]).indexOf(o)>-1:D[st.id]===o;return '<button class="chip" type="button" data-opt="'+esc(o)+'" aria-pressed="'+on+'">'+esc(o)+'</button>'}).join('')+'</div>';
+    }else if(st.type==='pin'){
+      h+='<div class="pin" id="wpin" role="group" aria-label="4-digit PIN">'+pinInputs()+'</div>';
+    }else if(st.type==='face'){
+      h+='<div class="chips"><button class="chip" type="button" data-opt="yes" aria-pressed="'+(D.face==='yes')+'">Yes, set it up</button><button class="chip" type="button" data-opt="skip" aria-pressed="'+(D.face==='skip')+'">Skip for now</button></div>';
+      if(D.face==='yes')h+='<div class="selfie"><label class="btn outline filebtn"><input type="file" accept="image/*" capture="user" id="selfieIn" aria-label="Take or choose a selfie">'+(D.selfie?'Retake selfie':'Take or choose a selfie')+'</label>'+(D.selfie?'<img alt="Your selfie" src="'+D.selfie+'">':'<span class="muted small">Optional. You can add it later.</span>')+'</div>';
+      h+='<p class="muted small"><b>Prototype note:</b> this version does not compare faces yet. Real face matching is planned for the next phase.</p>';
+    }else if(st.type==='consent'){
+      var cs=['My location is shared only after I miss check-ins.','My trusted adult knows I chose them and agrees to be contacted.','My face data is used to verify check-ins and nothing else.'];
+      h+=cs.map(function(c,i){return '<label class="check"><input type="checkbox" data-c="'+i+'" '+(D.consent[i]?'checked':'')+'><span>'+esc(c)+'</span></label>'}).join('');
+    }else if(st.type==='review'){
+      var rows=[['Name',D.name,0],['Who',D.role,1],['Mobile',D.phone,2],['Starts at',D.base,3],['Goes home to',D.home,4],['Travels by',(D.modes||[]).join(', '),5],['Trusted adult',D.cname+' ('+(D.crel||'')+')',6],['Their mobile',D.cphone,7],['Face check-in',D.face==='yes'?(D.selfie?'On, selfie added':'On, no selfie yet'):'Skipped',10]];
+      h+='<div>'+rows.map(function(r){return '<div class="rv"><small>'+r[0]+'</small><span>'+esc(r[1])+'</span><button type="button" data-edit="'+r[2]+'">Edit</button></div>'}).join('')+'</div>';
+    }
+    h+='<div class="err" id="err" role="alert"></div><div class="actions">'+(si>0?'<button class="btn outline" type="button" id="back">Back</button>':'')+'<button class="btn '+(st.type==='review'?'ok':'')+' lg" type="button" id="next">'+(st.type==='review'?'Create my Nightline space':'Continue')+'</button></div></div>';
+    $('#wizcard').innerHTML=h;
+    var inp=$('#in');if(inp){inp.focus();inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();next()}})}
+    else if(st.type==='pin'){wirePin('#wpin');var f=$('#wpin input');if(f)f.focus()}
+  }
+  function stepError(m){var e=$('#err');if(e)e.textContent=m}
+  function next(){
+    var st=STEPS[si],v;
+    if(st.type==='text'||st.type==='tel'){
+      v=($('#in').value||'').trim();
+      if(st.re){if(!st.re.test(v))return stepError(st.msg)}else if(v.length<(st.min||1))return stepError(st.msg);
+      if(st.id==='cphone'&&v.replace(/\D/g,'').slice(-10)===String(D.phone||'').replace(/\D/g,'').slice(-10))return stepError('Your trusted adult needs a different number from yours.');
+      D[st.id]=v;
+    }else if(st.type==='choice'){if(!D[st.id])return stepError(st.msg)}
+    else if(st.type==='multi'){if(!(D.modes||[]).length)return stepError(st.msg)}
+    else if(st.type==='pin'){v=readPin('#wpin');if(!/^\d{4}$/.test(v)||v==='0000'||v==='1234')return stepError(st.msg);D.pin=v}
+    else if(st.type==='face'){if(!D.face)return stepError(st.msg)}
+    else if(st.type==='consent'){if(!D.consent.every(Boolean))return stepError(st.msg)}
+    else if(st.type==='review')return finish();
+    si++;renderStep(1);
+  }
+  document.addEventListener('click',function(e){
+    if(view!=='wizard')return;var t=e.target;
+    if(t.id==='next')next();
+    else if(t.id==='back'){si=Math.max(0,si-1);renderStep(-1)}
+    else if(t.dataset&&t.dataset.edit){si=+t.dataset.edit;renderStep(-1)}
+    else if(t.dataset&&t.dataset.opt!==undefined){
+      var st=STEPS[si],o=t.dataset.opt;
+      if(st.type==='multi'){var a=D.modes||(D.modes=[]),i=a.indexOf(o);if(i>-1)a.splice(i,1);else a.push(o);t.setAttribute('aria-pressed',i===-1)}
+      else if(st.type==='face'){D.face=o;if(o==='skip')D.selfie=null;renderStep(1)}
+      else{D[st.id]=o;[].forEach.call(t.parentNode.children,function(c){c.setAttribute('aria-pressed',c===t)})}
+      stepError('');
+    }
+  });
+  document.addEventListener('change',function(e){
+    if(view!=='wizard')return;var t=e.target;
+    if(t.dataset&&t.dataset.c!==undefined){D.consent[+t.dataset.c]=t.checked;stepError('')}
+    if(t.id==='selfieIn'&&t.files&&t.files[0])shrink(t.files[0],function(url){D.selfie=url;renderStep(1)});
+  });
+  function shrink(file,cb){
+    var fr=new FileReader();
+    fr.onload=function(){var im=new Image();im.onload=function(){var s=240,c=document.createElement('canvas');c.width=c.height=s;var x=c.getContext('2d'),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);cb(c.toDataURL('image/jpeg',.7))};im.onerror=function(){toast('That file could not be read as a photo.','bad')};im.src=fr.result};
+    fr.readAsDataURL(file);
+  }
+  function finish(){
+    S={user:{name:D.name,role:D.role,phone:D.phone,base:D.base,home:D.home,modes:D.modes,pin:D.pin,face:D.face==='yes',selfie:D.selfie||null,contacts:[{name:D.cname,phone:D.cphone,rel:D.crel}],joined:Date.now()},trip:null,history:[],feed:[],demo:true,places:[D.base,D.home],tips:[],prefs:{inapp:true,sms:true,summary:false}};
+    save();authed=true;renderStepper();
+    $('#stepper').innerHTML=SECS.map(function(s,i){return '<div class="sg done"><span>✓</span>'+esc(s)+'</div>'}).join('');
+    $('#wizcard').innerHTML='<div class="stepin" style="align-items:flex-start"><span class="badge"><i></i>Registration complete</span><h2 class="q">You’re in, '+esc(first(D.name))+'.</h2><p class="lead">Your Nightline space is ready. '+esc(D.cname)+' is your trusted adult. Plan your first trip whenever you are ready.</p><button class="btn lg" id="enter" type="button">Open my Nightline space</button></div>';
+    $('#enter').onclick=function(){page='overview';show('app')};
+  }
+
+  /* ---------- trips (same logic as before) ---------- */
+  var DEMO_OFF=[0,10,20,30],REAL_OFF=[0,5,15,30];
+  function logFeed(msg,kind,sim){S.feed.unshift({t:Date.now(),msg:msg,kind:kind||'',sim:!!sim});S.feed=S.feed.slice(0,40)}
+  function startTrip(from,to,minutes,ci){
+    var now=Date.now(),demo=S.demo,deadline=demo?now+25000:now+minutes*60000;
+    var off=demo?DEMO_OFF.map(function(s){return s*1000}):REAL_OFF.map(function(m){return m*60000});
+    S.trip={id:now,from:from,to:to,minutes:minutes,start:now,deadline:deadline,times:off.map(function(o){return deadline+o}),fired:[false,false,false,false],status:'active',demo:demo,contact:ci};
+    logFeed('Trip started: '+from+' to '+to+'. Check in by '+fmtTime(deadline)+(demo?' (fast demo timing)':'')+'.','ok');save();
+  }
+  function contactOf(t){var u=S.user;return u.contacts[t.contact]||u.contacts[0]}
+  var STAGES=[
+    {n:'First alert',w:'Now',d:function(){return 'A message to you: you have missed a check-in.'}},
+    {n:'Second alert',w:'+5 min',d:function(){return 'Another message to you. Enter your PIN or tap “I’m okay” to stop everything.'}},
+    {n:'Trusted adult',w:'Still no action',d:function(t){var c=contactOf(t);return 'Your trip details went to '+c.name+' ('+c.rel+'): '+t.from+' to '+t.to+'.'}},
+    {n:'Emergency help',w:'No family action',d:function(){return 'An emergency message was queued for the police or a helpline.'}}
+  ];
+  function tick(){
+    var t=S.trip;if(!t||t.status!=='active')return;
+    var now=Date.now(),changed=false;
+    for(var i=0;i<4;i++)if(!t.fired[i]&&now>=t.times[i]){
+      t.fired[i]=true;changed=true;logFeed(STAGES[i].n+': '+STAGES[i].d(t),'bad',true);
+      toast(STAGES[i].n+': '+(i===0?'you missed a check-in.':i===1?'type your PIN to stop alerts.':i===2?'your trusted adult was notified (simulated).':'emergency message queued (simulated).'),'bad');
+    }
+    if(changed)save();
+    if(view==='app'&&page==='overview'){if(changed)renderOverview();else updateLive()}
+  }
+  setInterval(tick,500);
+  function endTrip(status){var t=S.trip;if(!t)return;S.history.unshift({id:t.id,from:t.from,to:t.to,at:t.start,ended:Date.now(),status:status,alerts:t.fired.filter(Boolean).length});S.history=S.history.slice(0,50);S.trip=null;save()}
+
+  function act(a,el){
+    var t=S.trip;
+    if(a==='closem')closeModal();
+    else if(a==='replace'){S={user:null,trip:null,history:[],feed:[],demo:true};norm();save();authed=false;startWizard()}
+    else if(a==='dologin'){var v=readPin('#lpin');if(v===S.user.pin){authed=true;closeModal();page='overview';show('app')}else{var e=$('#lerr');if(e)e.textContent='That PIN does not match. Try again.'}}
+    else if(a==='logout'){authed=false;show('landing')}
+    else if(a==='checkin')openCheckin();
+    else if(a==='confirmcheck'){if(t){t.status='checked';logFeed('Face check-in done. You are marked safe.','ok');save();toast('Checked in.','good')}closeModal();renderOverview()}
+    else if(a==='home'){if(t){logFeed('You confirmed you are home. Trip closed.','ok');endTrip(t.fired[0]?'late':'safe');toast('Welcome home, '+first(S.user.name)+'.','good')}renderOverview()}
+    else if(a==='okay')openOkay();
+    else if(a==='doOkay'){var pv=readPin('#opin');if(pv===S.user.pin){if(t){t.status='okay';logFeed('You typed your PIN. All alerts stopped.','ok');save()}closeModal();toast('Alerts stopped.','good');renderOverview()}else{var e2=$('#oerr');if(e2)e2.textContent='That PIN does not match.'}}
+    else if(a==='cancel'){if(t){logFeed('Trip cancelled.','');endTrip('cancelled')}renderOverview()}
+    else if(a==='start')submitPlan();
+    else if(a==='sharetrip'){copyText(shareText(),'Trip summary copied.')}
+    else if(a==='copyn'){copyText(el.dataset.n,'Copied '+el.dataset.n)}
+    else if(a==='addc')addContact();
+    else if(a==='delc'){var i=+el.dataset.i;if(S.user.contacts.length>1){S.user.contacts.splice(i,1);save();renderCircle()}else toast('Keep at least one trusted adult.','bad')}
+    else if(a==='testc'){var c=S.user.contacts[+el.dataset.i];logFeed('Test message to '+c.name+': “This is a test from Nightline. No action needed.”','ok',true);save();toast('Test message to '+c.name+' (simulated).','good')}
+    else if(a==='sosinfo'){openModal('<h3>In an emergency, call 112</h3><p class="muted">Nightline is a prototype and cannot contact emergency services. Call 112 for police, fire or ambulance. Women helplines: 1091 and 181.</p><div class="actions"><button class="btn danger" data-act="copyn" data-n="112">Copy 112</button><button class="btn outline" data-act="closem">Close</button></div>')}
+    else if(a==='sos1'){openModal('<h3>Send a simulated SOS?</h3><p class="muted">This shows what would happen: your circle and emergency help are alerted. Nothing is really sent. Call 112 for real help.</p><div class="actions"><button class="btn danger" data-act="sos2">Run simulated SOS</button><button class="btn outline" data-act="closem">Cancel</button></div>')}
+    else if(a==='sos2'){var c0=S.user.contacts[0];logFeed('SOS: message and trip details sent to '+c0.name+'.','bad',true);logFeed('SOS: emergency message queued for the police or a helpline.','bad',true);save();closeModal();toast('Simulated SOS sent to '+c0.name+' and emergency help.','bad');if(page==='toolkit')renderToolkit()}
+    else if(a==='saveprofile')saveProfile();
+    else if(a==='savepin')savePin();
+    else if(a==='addplace'){var v2=($('#np').value||'').trim();if(v2.length<2)return toast('Enter a place name.','bad');if(S.places.indexOf(v2)>-1)return toast('That place is already saved.');S.places.push(v2);save();renderPlan();toast('Place saved.','good')}
+    else if(a==='delplace'){S.places.splice(+el.dataset.i,1);save();renderPlan()}
+    else if(a==='wipe1'){$('#wipeBox').innerHTML='<p><b>This removes your account, trips and photo from this browser. It cannot be undone.</b></p><div class="actions"><button class="btn danger" data-act="wipe2">Yes, delete everything</button><button class="btn outline" data-act="wipe0">Keep my data</button></div>'}
+    else if(a==='wipe0')renderSettings();
+    else if(a==='wipe2'){S={user:null,trip:null,history:[],feed:[],demo:true};norm();save();authed=false;toast('Your data was deleted from this browser.');show('landing')}
+  }
+  function copyText(txt,msg){
+    function fallback(){toast(txt.length<60?txt:msg)}
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast(msg,'good')},fallback)}else fallback()}catch(e){fallback()}
+  }
+  function shareText(){var t=S.trip,u=S.user;if(!t)return '';return u.name+' is travelling from '+t.from+' to '+t.to+'. Expected by '+fmtTime(t.deadline)+'. Shared with Nightline (prototype).'}
+  function openCheckin(){
+    openModal('<h3>Face check-in</h3><p class="muted">Take a quick selfie so we know it is really you. The photo is not saved.</p><div class="scan" id="scanbox">No photo yet</div><div class="actions"><label class="btn filebtn"><input type="file" accept="image/*" capture="user" id="ckIn" aria-label="Open camera">Open camera</label><button class="btn outline" data-act="closem">Cancel</button></div><p class="muted small">Prototype note: faces are not compared in this version.</p>');
+    $('#ckIn').addEventListener('change',function(e){
+      var f=e.target.files&&e.target.files[0];if(!f)return;
+      shrink(f,function(url){
+        $('#scanbox').innerHTML='<img alt="Your selfie" src="'+url+'"><span class="beam"></span>';
+        setTimeout(function(){$('#mbox').innerHTML='<h3>Photo received</h3><div class="scan"><img alt="Your selfie" src="'+url+'"></div><p class="muted">Confirm to tell your circle you are okay. In the full app this step would match your face.</p><div class="actions"><button class="btn ok" data-act="confirmcheck">Confirm check-in</button><button class="btn outline" data-act="closem">Not now</button></div>'},1400);
+      });
+    });
+  }
+  function openOkay(){
+    openModal('<h3>I’m okay</h3><p class="muted">Type your 4-digit PIN to stop all alerts.</p><div class="pin" id="opin">'+pinInputs()+'</div><div class="err" id="oerr" role="alert"></div><div class="actions"><button class="btn ok" data-act="doOkay">Stop alerts</button><button class="btn outline" data-act="closem">Cancel</button></div>');
+    wirePin('#opin',function(){act('doOkay')});
+  }
+
+  /* ---------- dashboard ---------- */
+  var NAV=[['overview','home','Overview'],['plan','route','Plan a trip'],['history','list','Trip history'],['circle','users','My circle'],['toolkit','shield','Safety toolkit'],['settings','sliders','Settings']];
+  function renderApp(){
+    $('#side').innerHTML=NAV.map(function(n,i){return (i===5?'<div class="sep"></div>':'')+'<button data-page="'+n[0]+'" '+(page===n[0]?'aria-current="page"':'')+'>'+ic(n[1])+n[2]+'</button>'}).join('');
+    $$('.page').forEach(function(p){p.classList.toggle('on',p.id==='p-'+page)});
+    ({overview:renderOverview,plan:renderPlan,history:renderHistory,circle:renderCircle,toolkit:renderToolkit,settings:renderSettings})[page]();
+    header();
+  }
+  function statusLabel(t,late){return t.status==='checked'?'Checked in':t.status==='okay'?'Alerts stopped':late?'Missed check-in':'Trip active'}
+  function readiness(){
+    var u=S.user;return[
+      {t:'PIN set',ok:true},
+      {t:'Trusted adult added',ok:u.contacts.length>0},
+      {t:'Second trusted adult added',ok:u.contacts.length>1,go:'circle'},
+      {t:'Selfie added for face check-in',ok:!!u.selfie,go:'settings'},
+      {t:'First trip completed',ok:S.history.length>0,go:'plan'},
+      {t:'Safety tips reviewed',ok:S.tips.length>=3,go:'toolkit'}
+    ];
+  }
+  function renderOverview(){
+    var u=S.user,t=S.trip,rd=readiness(),pct=Math.round(rd.filter(function(r){return r.ok}).length/rd.length*100);
+    var safeN=S.history.filter(function(x){return x.status==='safe'}).length;
+    var h='<div class="pagehead"><h2>Hello, '+esc(first(u.name))+'</h2><p class="muted">'+(t&&t.status==='active'?'Your trip is live. Check in before the timer runs out.':t?'You are covered. Close the trip when you get home.':'Ready when you are. Plan a trip and your circle stays on standby.')+'</p></div>';
+    h+='<div class="kpis"><div class="kpi"><b>'+S.history.length+'</b><span>Trips completed</span></div><div class="kpi"><b>'+safeN+'</b><span>Arrived with no alerts</span></div><div class="kpi"><b>'+u.contacts.length+'</b><span>Trusted adults</span></div><div class="kpi"><b>'+pct+'%</b><span>Safety readiness</span></div></div>';
+    h+='<div class="cols"><div class="stack">';
+    if(t){
+      var c=contactOf(t),late=t.status==='active'&&Date.now()>t.deadline;
+      h+='<div class="card elev"><div class="mock top" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span class="badge '+(t.status!=='active'?'':late?'bad':'brand')+'" id="stBadge"><i></i><span id="stLabel">'+statusLabel(t,late)+'</span></span>'+(t.demo?'<span class="sim">Fast demo timing</span>':'')+'</div>';
+      h+='<div class="route"><span>'+esc(t.from)+'</span><span class="dot"></span><span class="ln"></span><span class="dot"></span><span>'+esc(t.to)+'</span></div>';
+      if(t.status==='active'){
+        h+='<div><div class="small muted" id="cdLab">'+(late?'Late by':'Check in within')+'</div><div class="big" id="cd">'+mmss(late?Date.now()-t.deadline:t.deadline-Date.now())+'</div></div><div class="meter"><b id="mt"></b></div><p class="small muted">Check in by <b style="color:var(--fg)">'+fmtTime(t.deadline)+'</b> · Trusted adult: <b style="color:var(--fg)">'+esc(c.name)+'</b></p>';
+        h+='<div class="actions"><button class="btn ok" data-act="checkin">Check in with face</button>'+(t.fired[0]?'<button class="btn" data-act="okay">I’m okay</button>':'')+'<button class="btn outline" data-act="sharetrip">'+ic('copy')+'Copy trip summary</button><button class="btn outline" data-act="cancel">Cancel trip</button></div>';
+      }else{
+        h+='<p><b>'+(t.status==='checked'?'You checked in with your face.':'You stopped the alerts with your PIN.')+'</b> Tap below when you are home so the plan closes.</p><div class="actions"><button class="btn ok" data-act="home">I’m home</button></div>';
+      }
+      h+='</div>';
+    }else{
+      h+='<div class="card elev"><h3>No trip right now</h3><p class="muted">Pick where you are leaving from, where you are going and when you will arrive. Your circle only gets involved if you miss your check-in.</p><div class="actions"><button class="btn" data-page="plan">Plan a trip</button></div></div>';
+    }
+    h+='<div class="card"><h3>Recent trips</h3>'+(S.history.length?'<div>'+S.history.slice(0,4).map(function(x){return '<div class="fi" style="grid-template-columns:1fr auto"><span><b>'+esc(x.from)+'</b> to <b>'+esc(x.to)+'</b><br><small class="muted">'+fmtDate(x.at)+' · '+fmtTime(x.at)+'</small></span>'+statusBadge(x.status)+'</div>'}).join('')+'</div><div class="actions"><button class="btn outline sm" data-page="history">View all</button></div>':'<p class="empty">Your finished trips show up here.</p>')+'</div>';
+    h+='<div class="card"><h3>Safety readiness</h3><div class="contact"><div class="donut" style="--p:'+pct+'"><span>'+pct+'%</span></div><p class="muted grow">Finish these to get the most out of Nightline.</p></div><ul class="ready">'+rd.map(function(r){return '<li class="'+(r.ok?'done':'')+'">'+ic(r.ok?'check':'circle')+'<span>'+esc(r.t)+'</span>'+(!r.ok&&r.go?'<button class="btn outline sm" style="margin-left:auto" data-page="'+r.go+'">Go</button>':'')+'</li>'}).join('')+'</ul></div>';
+    h+='</div><div class="stack"><div class="card"><h3>The safety net</h3><div class="tl">'+STAGES.map(function(s,i){return '<div class="ev '+(t&&t.fired[i]?'on':'')+'"><span class="w">'+s.w+'</span><b>'+s.n+'</b><small>'+esc(t?s.d(t):s.d({from:'your start',to:'your destination',contact:0}))+'</small></div>'}).join('')+'</div></div>';
+    h+='<div class="card"><h3>Activity <span class="sim">Simulated</span></h3><div class="feed">'+(S.feed.length?S.feed.slice(0,12).map(function(f){return '<div class="fi '+f.kind+'"><time>'+fmtTime(f.t)+'</time><span>'+esc(f.msg)+'</span></div>'}).join(''):'<p class="empty">Messages and alerts appear here. Nothing is really sent in this prototype.</p>')+'</div></div></div></div>';
+    $('#p-overview').innerHTML=h;updateLive();
+  }
+  function statusBadge(s){return '<span class="badge '+(s==='safe'?'':s==='late'?'warn':'brand')+'">'+(s==='safe'?'Arrived safe':s==='late'?'Arrived after alert':'Cancelled')+'</span>'}
+  function updateLive(){
+    var t=S.trip;if(!t||t.status!=='active')return;
+    var now=Date.now(),late=now>t.deadline,cd=$('#cd');if(!cd)return;
+    cd.textContent=mmss(late?now-t.deadline:t.deadline-now);
+    var lab=$('#cdLab');if(lab)lab.textContent=late?'Late by':'Check in within';
+    var mt=$('#mt');if(mt)mt.style.width=Math.min(100,(now-t.start)/(t.deadline-t.start)*100)+'%';
+    var sl=$('#stLabel');if(sl)sl.textContent=statusLabel(t,late);
+    var b=$('#stBadge');if(b)b.className='badge '+(late?'bad':'brand');
+  }
+  function renderPlan(){
+    var u=S.user,t=S.trip,h='<div class="pagehead"><h2>Plan a trip</h2><p class="muted">From, to, by when. Your trusted adult stays quiet unless you miss your check-in.</p></div>';
+    if(t){h+='<div class="card"><h3>You already have a trip running</h3><p class="muted">Finish or cancel it from Overview before planning another.</p><div class="actions"><button class="btn" data-page="overview">Go to Overview</button></div></div>';$('#p-plan').innerHTML=h;return}
+    h+='<div class="cols"><div class="stack"><div class="card elev"><h3>Trip details</h3>';
+    h+='<div class="chips" aria-label="Quick routes"><button class="chip" type="button" id="pre1">'+esc(u.base)+' → '+esc(u.home)+'</button><button class="chip" type="button" id="pre2">'+esc(u.home)+' → '+esc(u.base)+'</button></div>';
+    h+='<div class="formgrid"><div class="field"><label for="pf">From <span class="req">*</span></label><input type="text" id="pf" list="plc" value="'+esc(u.base)+'"></div><div class="field"><label for="pt">To <span class="req">*</span></label><input type="text" id="pt" list="plc" value="'+esc(u.home)+'"></div></div><datalist id="plc">'+S.places.map(function(p){return '<option value="'+esc(p)+'">'}).join('')+'</datalist>';
+    h+='<div class="field"><span class="lab">Expected travel time</span><div class="chips" id="pm">'+[10,20,30,45,60].map(function(m){return '<button type="button" class="chip" data-m="'+m+'" aria-pressed="'+(m===30)+'">'+m+' min</button>'}).join('')+'</div></div>';
+    h+='<div class="field"><span class="lab">Trusted adult</span><div class="chips" id="pc">'+u.contacts.map(function(c,i){return '<button type="button" class="chip" data-ci="'+i+'" aria-pressed="'+(i===0)+'">'+esc(c.name)+' · '+esc(c.rel)+'</button>'}).join('')+'</div></div>';
+    h+='<label class="switch"><span>Fast demo timing<br><small class="muted">Alerts fire in seconds so you can show the full chain live.</small></span><input type="checkbox" id="pd" '+(S.demo?'checked':'')+'></label><div class="err" id="perr" role="alert"></div><div class="actions"><button class="btn lg" data-act="start">Start trip</button></div></div>';
+    h+='<div class="card"><h3>Saved places</h3><div class="chips">'+(S.places.length?S.places.map(function(p,i){return '<span class="chip" style="cursor:default">'+esc(p)+' <button type="button" data-act="delplace" data-i="'+i+'" aria-label="Remove '+esc(p)+'" style="border:0;background:none;color:inherit;cursor:pointer;font:inherit;font-weight:800">×</button></span>'}).join(''):'<span class="empty">No saved places yet.</span>')+'</div><div class="actions"><div class="field" style="flex:1;min-width:180px"><label for="np" class="sr">New place</label><input id="np" type="text" placeholder="Add a place, e.g. Bus stop 14"></div><button class="btn outline" data-act="addplace">Save place</button></div></div></div>';
+    h+='<div class="card"><h3>What happens if you miss it</h3><div class="tl" id="prev"></div></div></div>';
+    $('#p-plan').innerHTML=h;
+    var mins=30,ci=0;
+    function preview(){
+      var demo=$('#pd').checked,now=Date.now(),dl=demo?now+25000:now+mins*60000,off=demo?DEMO_OFF.map(function(x){return x*1000}):REAL_OFF.map(function(x){return x*60000});
+      $('#prev').innerHTML=STAGES.map(function(s,i){return '<div class="ev on"><span class="w">'+(demo?'at '+(25+DEMO_OFF[i])+' sec':fmtTime(dl+off[i]))+'</span><b>'+s.n+'</b><small>'+esc(s.d({from:$('#pf').value||'your start',to:$('#pt').value||'your destination',contact:ci}))+'</small></div>'}).join('');
+    }
+    preview();
+    $('#pre1').onclick=function(){$('#pf').value=u.base;$('#pt').value=u.home;preview()};
+    $('#pre2').onclick=function(){$('#pf').value=u.home;$('#pt').value=u.base;preview()};
+    $('#pm').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;mins=+b.dataset.m;$$('#pm .chip').forEach(function(c){c.setAttribute('aria-pressed',c===b)});preview()};
+    $('#pc').onclick=function(e){var b=e.target.closest('[data-ci]');if(!b)return;ci=+b.dataset.ci;$$('#pc .chip').forEach(function(c){c.setAttribute('aria-pressed',c===b)});preview()};
+    $('#pd').onchange=function(){S.demo=this.checked;save();preview()};
+    $('#pf').oninput=$('#pt').oninput=preview;
+    window.__plan=function(){return{mins:mins,ci:ci}};
+  }
+  function submitPlan(){
+    var f=($('#pf').value||'').trim(),t=($('#pt').value||'').trim();
+    if(f.length<2||t.length<2){$('#perr').textContent='Fill in both where you are leaving from and where you are going.';return}
+    var p=window.__plan();startTrip(f,t,p.mins,p.ci);page='overview';renderApp();toast('Trip started. Stay safe.','good');
+  }
+  var hFilter='all';
+  function renderHistory(){
+    var list=S.history.filter(function(x){return hFilter==='all'||x.status===hFilter});
+    var h='<div class="pagehead"><h2>Trip history</h2><p class="muted">Every trip you have planned in this browser.</p></div><div class="card"><div class="actions"><div class="field"><label for="hf" class="sr">Filter by status</label><select id="hf"><option value="all">All trips</option><option value="safe">Arrived safe</option><option value="late">Arrived after alert</option><option value="cancelled">Cancelled</option></select></div><span class="muted small">'+list.length+' trip'+(list.length===1?'':'s')+'</span></div>';
+    h+=list.length?'<div class="tablewrap"><table><thead><tr><th>Date</th><th>Route</th><th>Time</th><th>Alerts</th><th>Status</th></tr></thead><tbody>'+list.map(function(x){var dur=x.ended?Math.max(1,Math.round((x.ended-x.at)/60000))+' min':'—';return '<tr><td>'+fmtDate(x.at)+'<br><small class="muted">'+fmtTime(x.at)+'</small></td><td>'+esc(x.from)+' → '+esc(x.to)+'</td><td>'+dur+'</td><td>'+x.alerts+' of 4</td><td>'+statusBadge(x.status)+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="empty">No trips to show yet. Plan your first trip to see it here.</p>';
+    h+='</div>';
+    $('#p-history').innerHTML=h;$('#hf').value=hFilter;$('#hf').onchange=function(){hFilter=this.value;renderHistory()};
+  }
+  function renderCircle(){
+    var u=S.user,h='<div class="pagehead"><h2>My circle</h2><p class="muted">The people who hear about your trip if you miss a check-in. You choose them, and they agree first.</p></div><div class="cols"><div class="stack">';
+    h+=u.contacts.map(function(c,i){return '<div class="card"><div class="contact"><span class="avatar">'+esc(c.name.charAt(0).toUpperCase())+'</span><div class="grow"><h3>'+esc(c.name)+'</h3><p class="muted">'+esc(c.rel)+' · '+esc(c.phone)+'</p></div><div class="actions"><button class="btn outline sm" data-act="testc" data-i="'+i+'">Send test message</button><button class="btn outline sm" data-act="delc" data-i="'+i+'">Remove</button></div></div></div>'}).join('');
+    h+='</div>';
+    if(u.contacts.length<3)h+='<div class="card elev"><h3>Add another trusted adult</h3><div class="field"><label for="cn">Name <span class="req">*</span></label><input type="text" id="cn"></div><div class="field"><label for="cp">Mobile number <span class="req">*</span></label><input type="tel" id="cp" inputmode="tel"></div><div class="field"><label for="cr">Relationship</label><select id="cr"><option>Parent</option><option>Sibling</option><option>Friend</option><option>Partner</option><option>Warden or mentor</option><option>Other</option></select></div><div class="err" id="cerr" role="alert"></div><div class="actions"><button class="btn" data-act="addc">Add to my circle</button></div></div>';
+    else h+='<div class="card"><p class="muted">You have three people in your circle, which is the maximum for now.</p></div>';
+    h+='</div>';$('#p-circle').innerHTML=h;
+  }
+  function addContact(){
+    var n=($('#cn').value||'').trim(),p=($('#cp').value||'').trim(),r=$('#cr').value;
+    if(n.length<2)return $('#cerr').textContent='Enter their name.';
+    if(!/^\+?[\d\s-]{10,14}$/.test(p))return $('#cerr').textContent='Enter a valid mobile number with 10 digits.';
+    S.user.contacts.push({name:n,phone:p,rel:r});save();renderCircle();toast(n+' was added to your circle.','good');
+  }
+  var TIPS=['Share your trip plan with a trusted adult before you leave.','Charge your phone above 20% before a night trip.','Note the vehicle number before you get in a cab or auto.','Choose lit, busy routes where you can.','Keep your PIN private and do not reuse your phone PIN.','Tell someone when you reach, even if the timer is still running.'];
+  function renderToolkit(){
+    var h='<div class="pagehead"><h2>Safety toolkit</h2><p class="muted">Quick help, helpline numbers and everyday safety tips.</p></div><div class="cols"><div class="stack">';
+    h+='<div class="card sos"><h3>SOS (simulated)</h3><p class="muted">Shows how your circle and emergency help would be alerted at once. Nothing is really sent. For real help, call 112.</p><div class="actions"><button class="btn danger lg" data-act="sos1">'+ic('alert')+'Run simulated SOS</button><button class="btn outline" data-act="copyn" data-n="112">Copy 112</button></div></div>';
+    h+='<div class="card"><h3>Helplines (India)</h3><div class="tablewrap"><table><tbody>'+[['Emergency response','112'],['Police','100'],['Women helpline','1091'],['Women helpline (domestic abuse)','181']].map(function(r){return '<tr><td>'+r[0]+'</td><td><b class="pin2">'+r[1]+'</b></td><td><button class="btn outline sm" data-act="copyn" data-n="'+r[1]+'">Copy</button></td></tr>'}).join('')+'</tbody></table></div></div></div>';
+    h+='<div class="card"><h3>Safety tips</h3><p class="muted small">Tick the ones you already follow.</p>'+TIPS.map(function(t,i){return '<label class="check"><input type="checkbox" data-tip="'+i+'" '+(S.tips.indexOf(i)>-1?'checked':'')+'><span>'+esc(t)+'</span></label>'}).join('')+'</div></div>';
+    $('#p-toolkit').innerHTML=h;
+    $$('[data-tip]').forEach(function(c){c.onchange=function(){var i=+c.dataset.tip,k=S.tips.indexOf(i);if(c.checked&&k===-1)S.tips.push(i);if(!c.checked&&k>-1)S.tips.splice(k,1);save()}});
+  }
+  function renderSettings(){
+    var u=S.user,h='<div class="pagehead"><h2>Settings</h2><p class="muted">Your details, how the site looks, and your data.</p></div><div class="cols"><div class="stack">';
+    h+='<div class="card elev"><h3>Profile</h3><div class="formgrid"><div class="field"><label for="sn">Name</label><input id="sn" type="text" value="'+esc(u.name)+'"></div><div class="field"><label for="sp">Mobile number</label><input id="sp" type="tel" value="'+esc(u.phone)+'"></div><div class="field"><label for="sb">Usually starts at</label><input id="sb" type="text" value="'+esc(u.base)+'"></div><div class="field"><label for="sh">Usually goes home to</label><input id="sh" type="text" value="'+esc(u.home)+'"></div></div><div class="err" id="serr" role="alert"></div><div class="actions"><button class="btn" data-act="saveprofile">Save profile</button></div></div>';
+    h+='<div class="card"><h3>Change PIN</h3><div class="formgrid"><div class="field"><label for="op">Current PIN</label><input id="op" type="password" inputmode="numeric" maxlength="4"></div><div class="field"><label for="np2">New PIN</label><input id="np2" type="password" inputmode="numeric" maxlength="4"></div></div><div class="err" id="perr2" role="alert"></div><div class="actions"><button class="btn outline" data-act="savepin">Update PIN</button></div></div>';
+    h+='<div class="card" id="wipeBox"><h3>Delete my data</h3><p class="muted">Remove your account, trips and photo from this browser.</p><div class="actions"><button class="btn danger" data-act="wipe1">Delete everything</button></div></div></div><div class="stack">';
+    h+='<div class="card"><h3>Appearance</h3><div class="field"><label for="s1">Theme</label><select id="s1"><option value="auto">Match my device</option><option value="light">Light</option><option value="dark">Dark</option><option value="contrast">High contrast</option></select></div><div class="field"><label for="s2">Accent colour</label><select id="s2"><option value="blue">Blue</option><option value="green">Green</option><option value="saffron">Saffron</option><option value="purple">Purple</option></select></div><div class="field"><label for="s3">Text size</label><select id="s3"><option value="sm">Small</option><option value="md">Default</option><option value="lg">Large</option><option value="xl">Extra large</option></select></div></div>';
+    h+='<div class="card"><h3>Notifications <span class="sim">Simulated</span></h3><label class="switch"><span>Show alerts on screen</span><input type="checkbox" data-pref="inapp" '+(S.prefs.inapp?'checked':'')+'></label><label class="switch"><span>SMS to me when a check-in is missed</span><input type="checkbox" data-pref="sms" '+(S.prefs.sms?'checked':'')+'></label><label class="switch"><span>Weekly trip summary</span><input type="checkbox" data-pref="summary" '+(S.prefs.summary?'checked':'')+'></label></div>';
+    h+='<div class="card"><h3>What is saved</h3><ul class="ready"><li class="done">'+ic('check')+'<span style="text-decoration:none;color:var(--fg)">Name, role and mobile number</span></li><li class="done">'+ic('check')+'<span style="text-decoration:none;color:var(--fg)">Usual places and saved places</span></li><li class="done">'+ic('check')+'<span style="text-decoration:none;color:var(--fg)">Trusted adults and recent trips</span></li><li class="done">'+ic('check')+'<span style="text-decoration:none;color:var(--fg)">PIN'+(u.selfie?' and one small selfie':'')+'</span></li></ul><p class="muted small">All of this stays in this browser on this device. Nothing is uploaded.</p></div></div></div>';
+    $('#p-settings').innerHTML=h;
+    $('#s1').value=P.skin;$('#s2').value=P.accent;$('#s3').value=P.size;
+    $('#s1').onchange=function(){P.skin=this.value;applyPrefs()};
+    $('#s2').onchange=function(){P.accent=this.value;applyPrefs()};
+    $('#s3').onchange=function(){P.size=this.value;applyPrefs()};
+    $$('[data-pref]').forEach(function(c){c.onchange=function(){S.prefs[c.dataset.pref]=c.checked;save()}});
+  }
+  function saveProfile(){
+    var n=($('#sn').value||'').trim(),p=($('#sp').value||'').trim(),b=($('#sb').value||'').trim(),h=($('#sh').value||'').trim(),e=$('#serr');
+    if(n.length<2)return e.textContent='Enter at least 2 letters for your name.';
+    if(!/^\+?[\d\s-]{10,14}$/.test(p))return e.textContent='Enter a valid mobile number with 10 digits.';
+    if(b.length<2||h.length<2)return e.textContent='Fill in both of your usual places.';
+    var u=S.user;u.name=n;u.phone=p;u.base=b;u.home=h;
+    if(S.places.indexOf(b)===-1)S.places.push(b);if(S.places.indexOf(h)===-1)S.places.push(h);
+    save();e.textContent='';header();toast('Profile saved.','good');
+  }
+  function savePin(){
+    var o=$('#op').value,n=$('#np2').value,e=$('#perr2');
+    if(o!==S.user.pin)return e.textContent='Your current PIN does not match.';
+    if(!/^\d{4}$/.test(n)||n==='0000'||n==='1234')return e.textContent='Enter 4 digits that are not 0000 or 1234.';
+    S.user.pin=n;save();e.textContent='';$('#op').value=$('#np2').value='';toast('PIN updated.','good');
+  }
+
+  /* animated example clock on the landing hero */
+  var dc=1452;setInterval(function(){if(view!=='landing')return;dc=dc<=0?1452:dc-1;var el=$('#demoClock'),m=$('#demoMeter');if(el)el.textContent=mmss(dc*1000);if(m)m.style.width=Math.round((1-dc/2200)*100)+'%'},1000);
+
+  applyPrefs();show('landing');
+})();
+</script>
